@@ -133,7 +133,7 @@ FlatLand.prototype.checkCollission = function(lander, params) {
     if (lander.crashed || lander.landed) return; // No need 
 
     if (lander.x.y <= this.h + params.landerRadius) {
-        var landed = (vector.angle_dist(lander.o.angle(), 0) < params.landingOrientationEpsilon
+        var landed = (vector.angle_dist(lander.o.angle(), Math.PI/2) < params.landingOrientationEpsilon
                 && lander.v.len() < params.landingMaxSpeed);
 
         // Hit the ground, stay there
