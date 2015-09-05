@@ -13,7 +13,7 @@ var DefaultParams = {
     gravity: new vector.Vector(0, -1),
     landerRadius: 5,
     landingOrientationEpsilon: 0.001,
-    ladingMaxSpeed: 0.1,
+    landingMaxSpeed: 0.1,
 };
 
 /**
