@@ -1598,6 +1598,7 @@ function Lander(position, control, initialSpeed, initialOrientation, initialFuel
     self.o = initialOrientation || new vector.Vector(0, 1);
     self.w = 0; // Radians per tick
     self.fuel = initialFuel || 100;
+    self.thrusting = false;
 
     // These functions get passed to the control function
     self.commands = {
@@ -1625,6 +1626,7 @@ function Lander(position, control, initialSpeed, initialOrientation, initialFuel
             thruster: function() {
                 if (self.fuel <= 0) return;
                 self.v = self.v.plus(self.o.resize(self.params.thrusterAcceleration));
+                self.thrusting = true;
                 self.fuel -= 1;
             },
         }
@@ -1639,6 +1641,7 @@ Lander.prototype.doControl = function(params) {
     // This is a bit of a hacky solution to get the params into the closure we defined in the
     // constructor
     this.params = params;
+    this.thrusting = false;
     this.control(this.commands);
 }
 
