@@ -6,13 +6,14 @@ var vector = require('./vector.js');
 function NoControl(commands) {
 }
 
-var TURNING_SPEED = Math.PI / 100;
-var ACCELERATION_SPEED = 2;
-var GRAVITY = vector.Vector(0, -1);
-var LANDER_RADIUS = 5;
-
-var LAND_ORIENTATION_EPSILON = 0.001;
-var LAND_MAX_SPEED = 0.1;
+var DefaultParams = {
+    turningSpeed: Math.PI / 100,
+    thrusterAcceleration: 2,
+    gravity: vector.Vector(0, -1),
+    landerRadius: 5,
+    landingOrientationEpsilon: 0.001,
+    ladingMaxSpeed: 0.1,
+};
 
 /**
  * x: Position
@@ -37,28 +38,32 @@ function Lander(position, initialSpeed, initialOrientation, initialFuel, control
     // These functions get passed to the control function
     self.commands = {
         // Getters
-        x: function() { return self.x },
-        v: function() { return self.v },
-        o: function() { return self.o },
-        fuel: function() { return self.fuel },
-        w: function() { return self.w },
+        see: {
+            x: function() { return self.x },
+            v: function() { return self.v },
+            o: function() { return self.o },
+            fuel: function() { return self.fuel },
+            w: function() { return self.w },
+        },
 
-        // Updaters
-        turnLeft: function() {
-            if (self.fuel <= 0) return;
-            self.w -= TURNING_SPEED;
-            self.fuel -= 1;
-        },
-        turnRight: function() {
-            if (self.fuel <= 0) return;
-            self.w += TURNING_SPEED;
-            self.fuel -= 1;
-        },
-        thruster: function() {
-            if (self.fuel <= 0) return;
-            self.v = self.v.plus(self.o.resize(ACCELERATION_SPEED));
-            self.fuel -= 1;
-        },
+        do: {
+            // Updaters
+            turnLeft: function() {
+                if (self.fuel <= 0) return;
+                self.w -= self.params.turningSpeed;
+                self.fuel -= 1;
+            },
+            turnRight: function() {
+                if (self.fuel <= 0) return;
+                self.w += self.params.turningSpeed;
+                self.fuel -= 1;
+            },
+            thruster: function() {
+                if (self.fuel <= 0) return;
+                self.v = self.v.plus(self.o.resize(self.params.thrusterAcceleration));
+                self.fuel -= 1;
+            },
+        }
     };
 }
 
@@ -66,16 +71,19 @@ Lander.prototype.crash = function() {
     this.crashed = true;
 }
 
-Lander.prototype.doControl = function(sim) {
+Lander.prototype.doControl = function(params) {
+    // This is a bit of a hacky solution to get the params into the closure we defined in the
+    // constructor
+    this.params = params;
     this.control(this.commands);
 }
 
-Lander.prototype.doPhysics = function(world) {
+Lander.prototype.doPhysics = function(world, params) {
     this.o = this.o.rotate(this.w);
 
     // FIXME: Only gravity if not landed? Otherwise, it's also fine if the speed induced by gravity
     // is below the crashing threshold.
-    this.v = this.v.plus(GRAVITY);
+    this.v = this.v.plus(params.gravity);
     this.x = this.x.plus(this.v);
 
     // Horizontal wraparound on X axis
@@ -85,17 +93,18 @@ Lander.prototype.doPhysics = function(world) {
 /**
  * A simulation drives a number of entities
  */
-function Simulation(world, lander) {
+function Simulation(world, lander, params) {
     this.world = world;
     this.lander = lander;
+    this.params = params || DefaultParams;
 }
 
 /**
  * Do a single tick of the simulation. Update all entities.
  */
 Simulation.prototype.tick = function() {
-    this.lander.doControl(this);
-    this.lander.doPhysics(this.world);
+    this.lander.doControl(this.params);
+    this.lander.doPhysics(this.world, this.params);
     this.world.checkCollission(this.lander);
 }
 
@@ -105,15 +114,16 @@ function FlatLand(width, h) {
     this.h = h || 0;
 }
 
-FlatLand.prototype.checkCollission = function(lander) {
+FlatLand.prototype.checkCollission = function(lander, params) {
     if (lander.crashed) return false; // No need 
 
-    if (lander.x.y <= this.h + LANDER_RADIUS) {
-        var landed = lander.o.angle() < LAND_ORIENTATION_EPSILON && lander.v.length() < LAND_MAX_SPEED;
+    if (lander.x.y <= this.h + params.landerRadisu) {
+        var landed = (lander.o.angle() < params.landingOrientationEpsilon
+                && lander.v.length() < params.landingMaxSpeed);
 
         if (landed) {
             // Hit the ground, stay there
-            lander.x = new vector.Vector(lander.x.x, this.h + LANDER_RADIUS);
+            lander.x = new vector.Vector(lander.x.x, this.h + params.landerRadisu);
             lander.v = new vector.Vector(0, 0);
             lander.o = new vector.Vector(0, 1);
             lander.w = 0;
