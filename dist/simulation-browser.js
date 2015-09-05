@@ -1592,6 +1592,7 @@ function Lander(position, control, initialSpeed, initialOrientation, initialFuel
     var self = this;
 
     self.crashed = false;
+    self.landed = false;
     self.x = position;
     self.control = control || NoControl;
     self.v = initialSpeed || new vector.Vector(0, 0);
@@ -1614,17 +1615,17 @@ function Lander(position, control, initialSpeed, initialOrientation, initialFuel
         do: {
             // Updaters
             turnLeft: function() {
-                if (self.fuel <= 0) return;
+                if (self.crashed || self.landed || self.fuel <= 0) return;
                 self.w -= self.params.turningSpeed;
                 self.fuel -= 1;
             },
             turnRight: function() {
-                if (self.fuel <= 0) return;
+                if (self.crashed || self.landed || self.fuel <= 0) return;
                 self.w += self.params.turningSpeed;
                 self.fuel -= 1;
             },
             thruster: function() {
-                if (self.fuel <= 0) return;
+                if (self.crashed || self.landed || self.fuel <= 0) return;
                 self.v = self.v.plus(self.o.resize(self.params.thrusterAcceleration));
                 self.thrusting = true;
                 self.fuel -= 1;
@@ -1635,6 +1636,14 @@ function Lander(position, control, initialSpeed, initialOrientation, initialFuel
 
 Lander.prototype.crash = function() {
     this.crashed = true;
+    console.log("CRASHED with v=" + this.v.toString() + " (" + this.v.length() + ") and " +
+                "o=" + this.o.toString() + " (" + this.o.angle() + ")");
+}
+
+Lander.prototype.land = function() {
+    this.landed = true;
+    console.log("LANDED with v=" + this.v.toString() + " (" + this.v.length() + ") and " +
+                "o=" + this.o.toString() + " (" + this.o.angle() + ")");
 }
 
 Lander.prototype.doControl = function(params) {
@@ -1684,7 +1693,7 @@ function FlatLand(width, h) {
 }
 
 FlatLand.prototype.checkCollission = function(lander, params) {
-    if (lander.crashed) return; // No need 
+    if (lander.crashed || lander.landed) return; // No need 
 
     if (lander.x.y <= this.h + params.landerRadius) {
         var landed = (lander.o.angle() < params.landingOrientationEpsilon
@@ -1698,6 +1707,7 @@ FlatLand.prototype.checkCollission = function(lander, params) {
             // Graceful landing, correct orientation
             lander.o = new vector.Vector(0, 1);
             lander.w = 0;
+            lander.land();
         }
         else {
             // Poor you
