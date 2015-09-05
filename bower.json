@@ -1,0 +1,18 @@
+{
+  "name": "moonlander-simulation",
+  "version": "0.0.1",
+  "homepage": "https://github.com/darwins-challenge/moonlander-simulation",
+  "authors": [
+    "Rico Huijbers <rix0rrr@gmail.com>"
+  ],
+  "ignore": [
+    "package.json",
+    "!dist"
+  ],
+  "main": "dist/simulation-browser.js",
+  "moduleType": [
+    "globals",
+    "node"
+  ],
+  "license": "MIT"
+}
