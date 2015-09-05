@@ -70,13 +70,16 @@ Lander.prototype.doControl = function(sim) {
     this.control(this.commands);
 }
 
-Lander.prototype.doPhysics = function() {
+Lander.prototype.doPhysics = function(world) {
     this.o = this.o.rotate(this.w);
 
     // FIXME: Only gravity if not landed? Otherwise, it's also fine if the speed induced by gravity
     // is below the crashing threshold.
     this.v = this.v.plus(GRAVITY);
     this.x = this.x.plus(this.v);
+
+    // Horizontal wraparound on X axis
+    this.x.x = (this.x.x + world.width) % world.width;
 }
 
 /**
@@ -92,12 +95,13 @@ function Simulation(world, lander) {
  */
 Simulation.prototype.tick = function() {
     this.lander.doControl(this);
-    this.lander.doPhysics();
+    this.lander.doPhysics(this.world);
     this.world.checkCollission(this.lander);
 }
 
 
-function FlatLand(h) {
+function FlatLand(width, h) {
+    this.width = width;
     this.h = h || 0;
 }
 
