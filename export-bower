@@ -1,0 +1,5 @@
+#!/bin/bash
+set -o errexit
+set -o nounset
+
+browserify simulation-browser.js -o dist/simulation-browser.js

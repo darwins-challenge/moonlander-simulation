@@ -134,7 +134,6 @@ FlatLand.prototype.checkCollission = function(lander, params) {
     }
 };
 
-
 module.exports = {
     Lander: Lander,
     Simulation: Simulation,
