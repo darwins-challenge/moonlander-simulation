@@ -2,7 +2,7 @@
   "name": "moonlander-simulation",
   "version": "0.0.1",
   "description": "Moonlander simulation module",
-  "main": "simulation.js",
+  "main": "index.js",
   "scripts": {
     "test": "mocha test"
   },
