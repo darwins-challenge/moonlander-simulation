@@ -79,6 +79,8 @@ Lander.prototype.doControl = function(params) {
 }
 
 Lander.prototype.doPhysics = function(world, params) {
+    if (this.crashed) return;
+
     this.o = this.o.rotate(this.w);
 
     // FIXME: Only gravity if not landed? Otherwise, it's also fine if the speed induced by gravity
@@ -115,7 +117,7 @@ function FlatLand(width, h) {
 }
 
 FlatLand.prototype.checkCollission = function(lander, params) {
-    if (lander.crashed) return false; // No need 
+    if (lander.crashed) return; // No need 
 
     if (lander.x.y <= this.h + params.landerRadius) {
         var landed = (lander.o.angle() < params.landingOrientationEpsilon
