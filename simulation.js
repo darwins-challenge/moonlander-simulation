@@ -8,12 +8,12 @@ function NoControl(commands) {
 }
 
 var DefaultParams = {
-    turningSpeed: Math.PI / 100,
-    thrusterAcceleration: 2,
-    gravity: new vector.Vector(0, -1),
-    landerRadius: 5,
-    landingOrientationEpsilon: 0.001,
-    landingMaxSpeed: 0.1,
+    turningSpeed: Math.PI / 1000,
+    thrusterAcceleration: 0.05,
+    gravity: new vector.Vector(0, -0.01),
+    landerRadius: 10,
+    landingOrientationEpsilon: Math.PI / 100,
+    landingMaxSpeed: 0.2,
 };
 
 /**
