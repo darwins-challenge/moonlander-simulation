@@ -136,14 +136,17 @@ FlatLand.prototype.checkCollission = function(lander, params) {
         var landed = (lander.o.angle() < params.landingOrientationEpsilon
                 && lander.v.length() < params.landingMaxSpeed);
 
+        // Hit the ground, stay there
+        lander.x = new vector.Vector(lander.x.x, this.h + params.landerRadius);
+        lander.v = new vector.Vector(0, 0);
+
         if (landed) {
-            // Hit the ground, stay there
-            lander.x = new vector.Vector(lander.x.x, this.h + params.landerRadius);
-            lander.v = new vector.Vector(0, 0);
+            // Graceful landing, correct orientation
             lander.o = new vector.Vector(0, 1);
             lander.w = 0;
         }
         else {
+            // Poor you
             lander.crash();
         }
     }
