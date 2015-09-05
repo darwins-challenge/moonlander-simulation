@@ -1,0 +1,26 @@
+{
+  "name": "moonlander-simulation",
+  "version": "0.0.1",
+  "description": "Moonlander simulation module",
+  "main": "simulation.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:darwins-challenge/moonlander-visualisation.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/darwins-challenge/moonlander-visualisation/issues"
+  },
+  "homepage": "https://github.com/darwins-challenge/moonlander-visualisation",
+  "dependencies": {
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "chai": "^3.2.0",
+    "mocha": "^2.3.0"
+  }
+}
