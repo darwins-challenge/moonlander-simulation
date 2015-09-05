@@ -92,7 +92,7 @@ Lander.prototype.doControl = function(params) {
 }
 
 Lander.prototype.doPhysics = function(world, params) {
-    if (this.crashed) return;
+    if (this.crashed || this.landed) return;
 
     this.o = this.o.rotate(this.w);
 
