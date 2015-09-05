@@ -1630,8 +1630,23 @@ function Lander(position, control, initialSpeed, initialOrientation, initialFuel
                 self.thrusting = true;
                 self.fuel -= 3;
             },
+            skip: function() {
+            }
         }
     };
+}
+
+Lander.prototype.dump = function() {
+    return {
+        crashed: this.crashed,
+        landed: this.landed,
+        x: this.x,
+        v: this.v,
+        o: this.o,
+        w: this.w,
+        fuel: this.fuel,
+        thrusting: this.thrusting
+    }
 }
 
 Lander.prototype.crash = function() {
@@ -1657,21 +1672,25 @@ Lander.prototype.doControl = function(params) {
 Lander.prototype.doPhysics = function(world, params) {
     if (this.crashed || this.landed) return;
 
-    this.o = this.o.rotate(this.w);
+    this.o.rotate(this.w);
 
     // FIXME: Only gravity if not landed? Otherwise, it's also fine if the speed induced by gravity
     // is below the crashing threshold.
-    this.v = this.v.plus(params.gravity);
-    this.x = this.x.plus(this.v);
+    this.v.add(params.gravity);
+    this.x.add(this.v);
 
-    // Horizontal wraparound on X axis
-    this.x.x = (this.x.x + world.width) % world.width;
+    // Horizontal wraparound on X axis (not modulo because that's slow)
+    if (this.x.x < 0)
+        this.x.x += world.width;
+    else if (this.x.x >= world.width)
+        this.x.x -= world.width;
 }
 
 /**
  * A simulation drives a number of entities
  */
 function Simulation(world, lander, params) {
+    this.t = 0;
     this.world = world;
     this.lander = lander;
     this.params = _.extend({}, DefaultParams, params || {});
@@ -1681,15 +1700,24 @@ function Simulation(world, lander, params) {
  * Do a single tick of the simulation. Update all entities.
  */
 Simulation.prototype.tick = function() {
+    this.t++;
     this.lander.doControl(this.params);
     this.lander.doPhysics(this.world, this.params);
     this.world.checkCollission(this.lander, this.params);
 }
 
+Simulation.prototype.dump = function() {
+    return { lander: this.lander.dump(), world: this.world.dump() };
+}
 
-function FlatLand(width, h) {
+function FlatLand(width, h, height) {
     this.width = width;
-    this.h = h || 0;
+    this.horizon = h || 0;
+    this.height = height || 1000;
+}
+
+FlatLand.prototype.dump = function() {
+    return { horizon: this.horizon }
 }
 
 FlatLand.prototype.checkCollission = function(lander, params) {
@@ -1703,7 +1731,7 @@ FlatLand.prototype.checkCollission = function(lander, params) {
 
         if (landed) {
             // Graceful landing, correct orientation
-            lander.o = new vector.Vector(0, 1);
+            lander.o.set(0, 1);
             lander.w = 0;
             lander.land();
         }
@@ -1713,8 +1741,8 @@ FlatLand.prototype.checkCollission = function(lander, params) {
         }
 
         // Hit the ground, stay there
-        lander.x = new vector.Vector(lander.x.x, this.h + params.landerRadius);
-        lander.v = new vector.Vector(0, 0);
+        lander.x.set(lander.x.x, this.h + params.landerRadius);
+        lander.v.set(0, 0);
     }
 };
 
@@ -1728,6 +1756,8 @@ module.exports = {
 },{"./vector.js":4,"underscore":1}],4:[function(require,module,exports){
 /**
  * Yep, vector class
+ *
+ * Used to be immutable but that doesn't perform well so now must routines mutate in-place.
  */
 
 function Vector(x, y) {
@@ -1751,12 +1781,14 @@ Vector.make = function(x) {
     return null;
 }
 
-Vector.prototype.plus = function(v) {
-    return new Vector(this.x + v.x, this.y + v.y);
+Vector.prototype.set = function(x, y) {
+    this.x = x;
+    this.y = y;
 }
 
-Vector.prototype.minus = function(v) {
-    return new Vector(this.x - v.x, this.y - v.y);
+Vector.prototype.add = function(v) {
+    this.x += v.x;
+    this.y += v.y;
 }
 
 Vector.prototype.len = function() {
@@ -1794,7 +1826,7 @@ Vector.prototype.len2 = function() {
 }
 
 Vector.prototype.times = function(f) {
-    return new Vector(this.x * f, this.y * f);
+    this.set(this.x * f, this.y * f);
 }
 
 /**
@@ -1826,10 +1858,13 @@ Vector.prototype.mod = function(v) {
  * Rotate by an amount of radians
  */
 Vector.prototype.rotate = function(a) {
+    if (a == 0) return;
     if (isNaN(a)) throw new Error('Rotate argument not a number');
-    var xx = this.x * Math.cos(a) - this.y * Math.sin(a);
-    var yy = this.x * Math.sin(a) + this.y * Math.cos(a);
-    return new Vector(xx, yy);
+    var c = Math.cos(a);
+    var s = Math.sin(a);
+    var xx = this.x * c - this.y * s;
+    var yy = this.x * s + this.y * c;
+    this.set(xx, yy);
 }
 
 /**

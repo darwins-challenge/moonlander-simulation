@@ -1,5 +1,7 @@
 /**
  * Yep, vector class
+ *
+ * Used to be immutable but that doesn't perform well so now must routines mutate in-place.
  */
 
 function Vector(x, y) {
@@ -23,12 +25,14 @@ Vector.make = function(x) {
     return null;
 }
 
-Vector.prototype.plus = function(v) {
-    return new Vector(this.x + v.x, this.y + v.y);
+Vector.prototype.set = function(x, y) {
+    this.x = x;
+    this.y = y;
 }
 
-Vector.prototype.minus = function(v) {
-    return new Vector(this.x - v.x, this.y - v.y);
+Vector.prototype.add = function(v) {
+    this.x += v.x;
+    this.y += v.y;
 }
 
 Vector.prototype.len = function() {
@@ -66,7 +70,7 @@ Vector.prototype.len2 = function() {
 }
 
 Vector.prototype.times = function(f) {
-    return new Vector(this.x * f, this.y * f);
+    this.set(this.x * f, this.y * f);
 }
 
 /**
@@ -98,10 +102,13 @@ Vector.prototype.mod = function(v) {
  * Rotate by an amount of radians
  */
 Vector.prototype.rotate = function(a) {
+    if (a == 0) return;
     if (isNaN(a)) throw new Error('Rotate argument not a number');
-    var xx = this.x * Math.cos(a) - this.y * Math.sin(a);
-    var yy = this.x * Math.sin(a) + this.y * Math.cos(a);
-    return new Vector(xx, yy);
+    var c = Math.cos(a);
+    var s = Math.sin(a);
+    var xx = this.x * c - this.y * s;
+    var yy = this.x * s + this.y * c;
+    this.set(xx, yy);
 }
 
 /**

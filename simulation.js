@@ -67,8 +67,23 @@ function Lander(position, control, initialSpeed, initialOrientation, initialFuel
                 self.thrusting = true;
                 self.fuel -= 3;
             },
+            skip: function() {
+            }
         }
     };
+}
+
+Lander.prototype.dump = function() {
+    return {
+        crashed: this.crashed,
+        landed: this.landed,
+        x: this.x,
+        v: this.v,
+        o: this.o,
+        w: this.w,
+        fuel: this.fuel,
+        thrusting: this.thrusting
+    }
 }
 
 Lander.prototype.crash = function() {
@@ -94,21 +109,25 @@ Lander.prototype.doControl = function(params) {
 Lander.prototype.doPhysics = function(world, params) {
     if (this.crashed || this.landed) return;
 
-    this.o = this.o.rotate(this.w);
+    this.o.rotate(this.w);
 
     // FIXME: Only gravity if not landed? Otherwise, it's also fine if the speed induced by gravity
     // is below the crashing threshold.
-    this.v = this.v.plus(params.gravity);
-    this.x = this.x.plus(this.v);
+    this.v.add(params.gravity);
+    this.x.add(this.v);
 
-    // Horizontal wraparound on X axis
-    this.x.x = (this.x.x + world.width) % world.width;
+    // Horizontal wraparound on X axis (not modulo because that's slow)
+    if (this.x.x < 0)
+        this.x.x += world.width;
+    else if (this.x.x >= world.width)
+        this.x.x -= world.width;
 }
 
 /**
  * A simulation drives a number of entities
  */
 function Simulation(world, lander, params) {
+    this.t = 0;
     this.world = world;
     this.lander = lander;
     this.params = _.extend({}, DefaultParams, params || {});
@@ -118,15 +137,24 @@ function Simulation(world, lander, params) {
  * Do a single tick of the simulation. Update all entities.
  */
 Simulation.prototype.tick = function() {
+    this.t++;
     this.lander.doControl(this.params);
     this.lander.doPhysics(this.world, this.params);
     this.world.checkCollission(this.lander, this.params);
 }
 
+Simulation.prototype.dump = function() {
+    return { lander: this.lander.dump(), world: this.world.dump() };
+}
 
-function FlatLand(width, h) {
+function FlatLand(width, h, height) {
     this.width = width;
-    this.h = h || 0;
+    this.horizon = h || 0;
+    this.height = height || 1000;
+}
+
+FlatLand.prototype.dump = function() {
+    return { horizon: this.horizon }
 }
 
 FlatLand.prototype.checkCollission = function(lander, params) {
@@ -140,7 +168,7 @@ FlatLand.prototype.checkCollission = function(lander, params) {
 
         if (landed) {
             // Graceful landing, correct orientation
-            lander.o = new vector.Vector(0, 1);
+            lander.o.set(0, 1);
             lander.w = 0;
             lander.land();
         }
@@ -150,8 +178,8 @@ FlatLand.prototype.checkCollission = function(lander, params) {
         }
 
         // Hit the ground, stay there
-        lander.x = new vector.Vector(lander.x.x, this.h + params.landerRadius);
-        lander.v = new vector.Vector(0, 0);
+        lander.x.set(lander.x.x, this.h + params.landerRadius);
+        lander.v.set(0, 0);
     }
 };
 
