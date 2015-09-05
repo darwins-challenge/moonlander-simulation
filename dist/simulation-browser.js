@@ -22,7 +22,7 @@ function NoControl(commands) {
 var DefaultParams = {
     turningSpeed: Math.PI / 100,
     thrusterAcceleration: 2,
-    gravity: vector.Vector(0, -1),
+    gravity: new vector.Vector(0, -1),
     landerRadius: 5,
     landingOrientationEpsilon: 0.001,
     ladingMaxSpeed: 0.1,
@@ -37,16 +37,16 @@ var DefaultParams = {
  *
  * The control function is supposed to control the lander using the f
  */
-function Lander(position, initialSpeed, initialOrientation, initialFuel, control) {
+function Lander(position, control, initialSpeed, initialOrientation, initialFuel) {
     var self = this;
 
     self.crashed = false;
     self.x = position;
+    self.control = control || NoControl;
     self.v = initialSpeed || new vector.Vector(0, 0);
     self.o = initialOrientation || new vector.Vector(0, 1);
     self.w = 0; // Radians per tick
     self.fuel = initialFuel || 100;
-    self.control = control || NoControl;
 
     // These functions get passed to the control function
     self.commands = {
