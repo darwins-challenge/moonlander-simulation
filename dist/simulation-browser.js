@@ -1598,7 +1598,7 @@ function Lander(position, control, initialSpeed, initialOrientation, initialFuel
     self.v = initialSpeed || new vector.Vector(0, 0);
     self.o = initialOrientation || new vector.Vector(0, 1);
     self.w = 0; // Radians per tick
-    self.fuel = initialFuel || 100;
+    self.fuel = initialFuel || 500;
     self.thrusting = false;
 
     // These functions get passed to the control function
@@ -1628,7 +1628,7 @@ function Lander(position, control, initialSpeed, initialOrientation, initialFuel
                 if (self.crashed || self.landed || self.fuel <= 0) return;
                 self.v = self.v.plus(self.o.resize(self.params.thrusterAcceleration));
                 self.thrusting = true;
-                self.fuel -= 1;
+                self.fuel -= 3;
             },
         }
     };
