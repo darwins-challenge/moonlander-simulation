@@ -73,13 +73,13 @@ function Lander(position, control, initialSpeed, initialOrientation, initialFuel
 
 Lander.prototype.crash = function() {
     this.crashed = true;
-    console.log("CRASHED with v=" + this.v.toString() + " (" + this.v.length() + ") and " +
+    console.log("CRASHED with v=" + this.v.toString() + " (" + this.v.len() + ") and " +
                 "o=" + this.o.toString() + " (" + this.o.angle() + ")");
 }
 
 Lander.prototype.land = function() {
     this.landed = true;
-    console.log("LANDED with v=" + this.v.toString() + " (" + this.v.length() + ") and " +
+    console.log("LANDED with v=" + this.v.toString() + " (" + this.v.len() + ") and " +
                 "o=" + this.o.toString() + " (" + this.o.angle() + ")");
 }
 
@@ -133,8 +133,8 @@ FlatLand.prototype.checkCollission = function(lander, params) {
     if (lander.crashed || lander.landed) return; // No need 
 
     if (lander.x.y <= this.h + params.landerRadius) {
-        var landed = (lander.o.angle() < params.landingOrientationEpsilon
-                && lander.v.length() < params.landingMaxSpeed);
+        var landed = (angle_dist(lander.o.angle(), 0) < params.landingOrientationEpsilon
+                && lander.v.len() < params.landingMaxSpeed);
 
         // Hit the ground, stay there
         lander.x = new vector.Vector(lander.x.x, this.h + params.landerRadius);
