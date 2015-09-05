@@ -2,6 +2,7 @@
  * Simulation module
  */
 var vector = require('./vector.js');
+var _ = require('underscore');
 
 function NoControl(commands) {
 }
@@ -98,7 +99,7 @@ Lander.prototype.doPhysics = function(world, params) {
 function Simulation(world, lander, params) {
     this.world = world;
     this.lander = lander;
-    this.params = params || DefaultParams;
+    this.params = _.extend({}, DefaultParams, params || {});
 }
 
 /**
