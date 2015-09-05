@@ -1616,12 +1616,12 @@ function Lander(position, control, initialSpeed, initialOrientation, initialFuel
             // Updaters
             turnLeft: function() {
                 if (self.crashed || self.landed || self.fuel <= 0) return;
-                self.w -= self.params.turningSpeed;
+                self.w += self.params.turningSpeed;
                 self.fuel -= 1;
             },
             turnRight: function() {
                 if (self.crashed || self.landed || self.fuel <= 0) return;
-                self.w += self.params.turningSpeed;
+                self.w -= self.params.turningSpeed;
                 self.fuel -= 1;
             },
             thruster: function() {
