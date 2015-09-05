@@ -118,7 +118,7 @@ function Simulation(world, lander, params) {
 Simulation.prototype.tick = function() {
     this.lander.doControl(this.params);
     this.lander.doPhysics(this.world, this.params);
-    this.world.checkCollission(this.lander);
+    this.world.checkCollission(this.lander, this.params);
 }
 
 
