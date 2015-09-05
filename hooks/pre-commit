@@ -3,3 +3,4 @@ set -o errexit
 set -o nounset
 
 browserify simulation-browser.js -o dist/simulation-browser.js
+git add dist/simulation-browser.js
