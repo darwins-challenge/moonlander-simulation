@@ -5,6 +5,7 @@
   "authors": [
     "Rico Huijbers <rix0rrr@gmail.com>"
   ],
+  "ignore": [],
   "main": "dist/simulation-browser.js",
   "moduleType": [
     "globals",
