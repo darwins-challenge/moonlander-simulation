@@ -1857,7 +1857,7 @@ function angle_dist(src, tgt) {
             return tgt - src - 2 * Math.PI;
     }
     else {
-        if (tgt > src) 
+        if (tgt >= src) 
             return tgt - src;
         else
             return tgt - src + 2 * Math.PI;
