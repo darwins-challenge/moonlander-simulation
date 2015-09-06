@@ -63,7 +63,7 @@ function Lander(position, control, initialSpeed, initialOrientation, initialFuel
             },
             thruster: function() {
                 if (self.crashed || self.landed || self.fuel <= 0) return;
-                self.v = self.v.plus(self.o.resize(self.params.thrusterAcceleration));
+                self.v.add(self.o.resize(self.params.thrusterAcceleration));
                 self.thrusting = true;
                 self.fuel -= 3;
             },
@@ -88,14 +88,18 @@ Lander.prototype.dump = function() {
 
 Lander.prototype.crash = function() {
     this.crashed = true;
+    /*
     console.log("CRASHED with v=" + this.v.toString() + " (" + this.v.len() + ") and " +
                 "o=" + this.o.toString() + " (" + this.o.angle() + ")");
+    */
 }
 
 Lander.prototype.land = function() {
     this.landed = true;
+    /*
     console.log("LANDED with v=" + this.v.toString() + " (" + this.v.len() + ") and " +
                 "o=" + this.o.toString() + " (" + this.o.angle() + ")");
+    */
 }
 
 Lander.prototype.doControl = function(params) {
@@ -113,7 +117,7 @@ Lander.prototype.doPhysics = function(world, params) {
 
     // FIXME: Only gravity if not landed? Otherwise, it's also fine if the speed induced by gravity
     // is below the crashing threshold.
-    this.v.add(params.gravity);
+    this.v.add(params.gravity); 
     this.x.add(this.v);
 
     // Horizontal wraparound on X axis (not modulo because that's slow)
@@ -159,28 +163,25 @@ FlatLand.prototype.dump = function() {
 
 FlatLand.prototype.checkCollission = function(lander, params) {
     if (lander.crashed || lander.landed) return; // No need 
+    if (lander.x.y > this.horizon + params.landerRadius) return;
 
-    if (lander.x.y <= this.h + params.landerRadius) {
-        var landed = (vector.angle_dist(lander.o.angle(), Math.PI/2) < params.landingOrientationEpsilon
-                && lander.v.len() < params.landingMaxSpeed);
+    var landed = (vector.angle_dist(lander.o.angle(), Math.PI/2) < params.landingOrientationEpsilon
+            && lander.v.len() < params.landingMaxSpeed);
 
-        console.log("angle_dist", vector.angle_dist(lander.o.angle(), Math.PI/2));
-
-        if (landed) {
-            // Graceful landing, correct orientation
-            lander.o.set(0, 1);
-            lander.w = 0;
-            lander.land();
-        }
-        else {
-            // Poor you
-            lander.crash();
-        }
-
-        // Hit the ground, stay there
-        lander.x.set(lander.x.x, this.h + params.landerRadius);
-        lander.v.set(0, 0);
+    if (landed) {
+        // Graceful landing, correct orientation
+        lander.o.set(0, 1);
+        lander.w = 0;
+        lander.land();
     }
+    else {
+        // Poor you
+        lander.crash();
+    }
+
+    // Hit the ground, stay there
+    lander.x.set(lander.x.x, this.horizon + params.landerRadius);
+    lander.v.set(0, 0);
 };
 
 module.exports = {
