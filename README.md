@@ -6,4 +6,6 @@ Simulation module for the moonlander app.
 
 Install the automatic browserify hook:
 
-   ln -s ../../hooks/pre-commit .git/hooks 
+```sh
+ln -s hooks/pre-commit .git/hooks 
+```
