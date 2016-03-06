@@ -7,7 +7,7 @@ Simulation module for the moonlander app.
 Download the dependency by calling
 
 ```sh
-bower install
+npm install; bower install
 ```
 
 Then install the automatic browserify hook:
